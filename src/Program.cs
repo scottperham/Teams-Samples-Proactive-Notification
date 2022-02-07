@@ -8,7 +8,15 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddTransient<IBot, MyBot>();
-builder.Services.AddSingleton<IBotFrameworkHttpAdapter, TeamsBotHttpAdapter>();
+
+builder.Services.AddSingleton<IBotFrameworkHttpAdapter, TeamsBotHttpAdapter>(x =>
+{
+    var adapter = new TeamsBotHttpAdapter(x.GetService<IWebHostEnvironment>(), x.GetService<BotFrameworkAuthentication>(), x.GetService<ILogger<TeamsBotHttpAdapter>>());
+
+    adapter.Use(new BotMiddleware());
+
+    return adapter;
+});
 builder.Services.AddSingleton<BotFrameworkAuthentication, ConfigurationBotFrameworkAuthentication>();
 builder.Services.AddSingleton<Notifier>();
 

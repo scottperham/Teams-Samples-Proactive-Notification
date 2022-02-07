@@ -27,18 +27,32 @@ namespace TeamsBotTemplate.Controllers
 
         [Route("api/postmessage")]
         [HttpPost]
-        public async Task PostMessageAsync([FromBody] ProactiveMessageRequest request, CancellationToken cancellationToken)
+        public async Task<IActionResult> PostMessageAsync([FromBody] ProactiveMessageRequest request, CancellationToken cancellationToken)
         {
-            var activity = MessageFactory.Text(request.Message);
+            var activity = MessageFactory.Text("This is a proactive message from outside of Teams");
 
-            await _notifier.SendProactiveNotification(request.Id, request.TenantId, activity, cancellationToken);
+            var success = await _notifier.SendProactiveNotification(request.Id, request.TenantId, activity, cancellationToken);
+
+            if (!success)
+            {
+                //return PreconditionFailed
+                return StatusCode(412);
+            }
+
+            return Ok();
+        }
+        
+        [Route("api/install")]
+        [HttpPost]
+        public IActionResult InstallAsync([FromBody] ProactiveMessageRequest request, CancellationToken cancellationToken)
+        {
+            return StatusCode(501);
         }
     }
 
     public class ProactiveMessageRequest
     {
         public string Id { get; set; }
-        public string Message { get; set; }
         public string TenantId { get; set; }
     }
 }
